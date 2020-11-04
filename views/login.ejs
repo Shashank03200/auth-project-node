@@ -1,15 +1,15 @@
 <%- include('./partials/header') -%>
 
-<%- include('./partials/message')  -%> 
+
 
 <div class="containerized">
     <div class="heading"><h2>Log IN</h2></div>
-    
+    <%- include('./partials/message')  -%> 
     <div class="form-group">
         <form action="/login" method="POST">
-            <input type="text" class ="form-control mb-2" name="usernameField" id="usernameField" placeholder="Enter your username" >
-            <input type="password" class ="form-control mb-2" name="passwordField" id="passwordField" placeholder="Enter the password">
-            <button class="btn btn-primary" type="submit mb-3">Log In</button>
+            <input type="text" class ="form-control mb-2" name="username" id="usernameField" placeholder="Enter your username" value= "<%= typeof username != 'undefined' ? username: ''%>"  >
+            <input type="password" class ="form-control mb-2" name="password" id="passwordField" placeholder="Enter the password">
+            <button class="btn btn-primary mb-3" type="submit">Log In</button>
         </form>
     </div>
 </div>
