@@ -1,5 +1,5 @@
 //eshine jsversion:6
-
+const md5 = require('md5')
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
@@ -72,7 +72,7 @@ app.post("/login", function (req, res) {
 
       if (foundUser) {
 
-          if (foundUser.password === password) {
+          if (foundUser.password === md5(password)) {
             res.redirect("/secret_page");
           } else {
             errors.push({ message: "The password is not correct." })
@@ -135,7 +135,7 @@ app.post("/register", function (req, res) {
         const newUser = new user({
           name: name,
           username: username,
-          password: password1
+          password: md5(password1)
         });
 
         // bcrypt.genSalt(10, (err, salt) => {
