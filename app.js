@@ -1,5 +1,5 @@
 //eshine jsversion:6
-
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
@@ -38,8 +38,8 @@ const userInfo = new mongoose.Schema({
   }
 })
 
-var secret = "Thisismysecretdatabase";
-userInfo.plugin(encrypt, { secret: secret, encryptedFields: ["password"] });
+console.log(process.env.SECRET);
+userInfo.plugin(encrypt, { secret: process.env.SECRET, encryptedFields: ["password"] });
 
 const user = mongoose.model('user', userInfo);
 
