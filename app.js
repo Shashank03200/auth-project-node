@@ -4,7 +4,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const ejs = require('ejs');
-// const encrypt = require('mongoose-encryption')
+const encrypt = require('mongoose-encryption')
 const bcrypt = require('bcryptjs')
 app = express();
 
@@ -38,8 +38,8 @@ const userInfo = new mongoose.Schema({
   }
 })
 
-// var secret = "Thisismysecretdatabase";
-// userInfo.plugin(encrypt, { secret: secret, encryptedFields: ["password"] });
+var secret = "Thisismysecretdatabase";
+userInfo.plugin(encrypt, { secret: secret, encryptedFields: ["password"] });
 
 const user = mongoose.model('user', userInfo);
 
@@ -72,15 +72,12 @@ app.post("/login", function (req, res) {
 
       if (foundUser) {
 
-        user.findOne({ password: password }).then(foundPass => {
-
-          if (foundPass) {
+          if (foundUser.password === password) {
             res.redirect("/secret_page");
           } else {
             errors.push({ message: "The password is not correct." })
             res.render('login', {errors, username });
           }
-        })
 
       }
       else {
