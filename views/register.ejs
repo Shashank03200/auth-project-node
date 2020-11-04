@@ -1,0 +1,27 @@
+<%- include('./partials/header') -%>
+
+
+
+<div class="containerized">
+    <div class="heading"><h2>Register</h2></div>
+    <%- include('./partials/message') -%>     
+    <div class="form-group">
+         <form action="/register" method="POST">
+            <input type="text" class ="form-control mb-5" name="name" id="name" placeholder="Enter your name"
+            value="<%= typeof name != 'undefined' ? name : '' %>"
+            >
+        <input type="text" class ="form-control mb-5" name="username" id="username" placeholder="Enter your username" 
+        value="<%= typeof username != 'undefined' ? username : '' %>"
+        >
+            <input type="password" class ="form-control mb-5" name="password1" id="password1" placeholder="Enter the password"
+            value="<%= typeof password1 != 'undefined' ? password1 : '' %>"
+            >
+            <input type="password" class ="form-control mb-5" name="password2" id="password2" placeholder="Confirm the password"
+            value="<%= typeof password2 != 'undefined' ? password2 : '' %>">
+            <button class="btn btn-primary  mb-2" type="submit" >Register</button>
+        </form>
+    </div>
+</div>
+
+
+<%- include('./partials/footer') -%>
