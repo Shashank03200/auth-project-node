@@ -78,37 +78,38 @@ app.post("/register", function (req, res) {
         })
     }
     else {
-        // User validation
-        user.findOne({ username: username })
-            .then( user => {
-                if (user) {
-                    // User exists
-                    errors.push({ message: "The username is already registered." })
-
-                    res.render('register', {
-                        errors,
-                        name,
-                        username,
-                        password1,
-                        password2
-                    })
-                }
-                else {
-
-                      const newUser = new user({
-                          name: name,
-                          username: username,
-                          password: password1
-                      });
-
-                      newUser.save();                                        
-                }
-            })
-            .catch((err)=>{
-                console.log(err)
+        user.findOne({ username: username }).then(foundUser => {
+          if (foundUser) {
+            errors.push({ message: 'Email already exists' });
+            res.render('register', {
+              errors,
+              name,
+              username,
+              password1,
+              password2
             });
-            
-    }
+          } else {
+            const newUser = new user({
+              name:name,
+              username:username,
+              password:password1
+            });
+    
+            // bcrypt.genSalt(10, (err, salt) => {
+            //   bcrypt.hash(newUser.password, salt, (err, hash) => {
+                
+            //     newUser.password = hash;
+                newUser
+                  .save()
+                  .then(user => {                    
+                    res.redirect('/login');
+                  })
+                  .catch(err => console.log(err));
+            //   // });
+            // });
+          }
+        });
+      }
 
 })
 
