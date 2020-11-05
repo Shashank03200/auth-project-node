@@ -1,17 +1,36 @@
 //eshine jsversion:6
-const md5 = require('md5')
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const flash = require('connect-flash');
+const session = require('express-session');
 const ejs = require('ejs');
-const encrypt = require('mongoose-encryption')
-const bcrypt = require('bcryptjs')
+const bcrypt = require('bcrypt')
 app = express();
 
 // Middlewares
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: false }))
 app.set('view engine', 'ejs')
+
+// Express session middleware
+app.use(session({
+  secret: 'secrets',
+  resave: true,
+  saveUninitialized: true,
+}));
+
+// Connect flash middleware
+app.use(flash());
+
+// Global vars
+app.use((req, res, next)=>{
+  res.locals.success_msg = req.flash('success_msg');
+  res.locals.error_msg = req.flash('error_msg');
+  res.locals.danger_msg = req.flash('danger-msg');
+  next();
+})
+
 
 // Setting up database
 mongoose.connect("mongodb://localhost:27017/usersDB", { useNewUrlParser: true, useUnifiedTopology: true })
@@ -37,9 +56,6 @@ const userInfo = new mongoose.Schema({
     type: String
   }
 })
-
-// console.log(process.env.SECRET);
-// userInfo.plugin(encrypt, { secret: process.env.SECRET, encryptedFields: ["password"] });
 
 const user = mongoose.model('user', userInfo);
 
@@ -72,16 +88,19 @@ app.post("/login", function (req, res) {
 
       if (foundUser) {
 
-          if (foundUser.password === md5(password)) {
+        bcrypt.compare(password, foundUser.password).then(function(foundUser){
+          if(foundUser)
             res.redirect("/secret_page");
-          } else {
-            errors.push({ message: "The password is not correct." })
-            res.render('login', {errors, username });
+          else{
+            errors.push({ type:'danger', message: "The password is incorrect." })
+            res.render('login', { errors, username });
+            // res.flash('danger_msg', 'The password entered is incorrect.');
           }
+        })
 
       }
       else {
-        errors.push({ message: "The username is not registered." })
+        errors.push({ type:'info', message: "The username is not registered." })
         res.render('login', {
           errors,
           username
@@ -123,34 +142,43 @@ app.post("/register", function (req, res) {
   else {
     user.findOne({ username: username }).then(foundUser => {
       if (foundUser) {
-        errors.push({ message: 'Email already exists' });
-        res.render('register', {
-          errors,
-          name,
-          username,
-          password1,
-          password2
-        });
+            errors.push({ message: 'Email already exists' });
+            res.render('register', {
+              errors,
+              name,
+              username,
+              password1,
+              password2
+            });
       } else {
-        const newUser = new user({
-          name: name,
-          username: username,
-          password: md5(password1)
-        });
+            const newUser = new user({
+              name: name,
+              username: username,
+              password: password1
+            });
 
-        // bcrypt.genSalt(10, (err, salt) => {
-        //   bcrypt.hash(newUser.password, salt, (err, hash) => {
+            bcrypt.genSalt(15, function(err, salt){
+              bcrypt.hash(newUser.password, salt, (err, hash)=>{
+                  if(err) throw err;
+                  // Setting password to hash
+                  newUser.password = hash;
 
-        //     newUser.password = hash;
-        newUser
-          .save()
-          .then(user => {
-            res.redirect('/login');
-          })
-          .catch(err => console.log(err));
-        //   // });
-        // });
-      }
+                  // Saving user data
+                  newUser.save()
+                  .then(user=>{
+                    req.flash('success_msg','You are now registered and can log in.');
+                    res.redirect("/login"); 
+                  })
+                  .catch((err)=>{
+                    console.log(err)
+                  })
+
+              })
+            })
+
+
+        
+        }
     });
   }
 
